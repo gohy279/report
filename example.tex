@@ -1,0 +1,419 @@
+\documentclass[15pt,a4paper]{extarticle}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{geometry}
+\geometry{left=3cm, right=1.5cm, top=2cm, bottom=2cm}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{indentfirst}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{ragged2e}
+\usepackage{url}  % Добавлено
+
+% Подключаем файл с библиографией
+
+
+% Убираем рамки и фон для кода
+\lstset{
+    backgroundcolor=\color{white},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=none,
+    tabsize=4,
+    xleftmargin=0pt,
+    xrightmargin=0pt,
+    aboveskip=0pt,
+    belowskip=0pt
+}
+
+% Убираем рамки вокруг гиперссылок
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    urlcolor=blue,
+    allcolors=black,
+    pdfborder={0 0 0},
+    pdfborderstyle={},
+    breaklinks=true,
+}
+
+\titleformat{\section}{\normalfont\bfseries\centering}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalfont\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalfont\itshape}{\thesubsubsection}{1em}{}
+
+% Компактные настройки для списка литературы
+\setlist[enumerate]{
+    leftmargin=*,
+    nosep,
+    labelwidth=1.2em,
+    leftmargin=2.2em,
+    itemindent=0pt,
+    parsep=2pt,
+    itemsep=3pt
+}
+\setlength{\emergencystretch}{4em}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+
+% Команда для компактного оформления URL
+\newcommand{\compacturl}[1]{\url{#1}}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+
+    \textbf{МИНОБРНАУКИ РОССИИ}
+    
+    Федеральное государственное бюджетное образовательное учреждение
+    
+    высшего образования
+    
+    \textbf{«САРАТОВСКИЙ НАЦИОНАЛЬНЫЙ ИССЛЕДОВАТЕЛЬСКИЙ}
+    
+    \textbf{ГОСУДАРСТВЕННЫЙ УНИВЕРСИТЕТ}
+    
+    \textbf{ИМЕНИ Н. Г. ЧЕРНЫШЕВСКОГО»}
+    
+    \vspace{1.5cm}
+    
+    \textbf{ПРОЕКТ. ПРИЛОЖЕНИЕ «БЛОГИКУМ».}
+    
+    \vspace{2cm}
+    
+    \textbf{ОТЧЁТ}
+    
+    \vspace{1cm}
+    
+    \raggedright
+    студента 2 курса 211 группы
+    
+    направления 02.03.02 — Фундаментальная информатика и информационные технологии
+    
+    факультета КНиИТ
+    
+    Катушов Егор Степанович
+    
+    \vspace{2cm}
+    
+    Проверено:
+    
+    доцент, к. ф.-м. н. \hfill \underline{\hspace{3cm}} \hfill И. А. Батраева
+    
+    \vfill
+    
+    \centering
+    Саратов 2025
+    
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Цель работы. Постановка задачи}
+
+\textbf{Цель работы:} доработка приложения «Блогикум» по заданию из урока №4 темы №5.
+
+\textbf{Постановка задачи:} необходимо реализовать следующие функциональные возможности:
+
+\begin{enumerate}
+    \item Кастомные страницы для ошибок (403, 404, 500).
+    \item Работа с пользователями. Подключить к проекту пользователей. Создать страницу \texttt{auth/registration/} с формой для регистрации пользователей. Создать страницу пользователя.
+    \item Пагинация. Подключить к проекту пагинацию и настроить вывод не более 10 публикаций: на главную страницу, на страницу пользователя, на страницу категории.
+    \item Изображения к постам. Добавить возможность прикреплять изображение к публикациям проекта. Если изображение добавлено, то оно должно отображаться в публикациях на главной странице, странице пользователя, странице категории, отдельной странице публикации.
+    \item Добавление новых публикаций. У зарегистрированных пользователей должна быть возможность самостоятельно публиковать посты.
+    \item Редактирование публикаций.
+    \item Комментарии к публикациям. Создать систему комментирования записей. На странице поста под текстом записи должна выводиться форма для отправки комментария, а ниже — список комментариев.
+    \item Удаление публикаций и комментариев. Авторизованные пользователи должны иметь возможность удалять собственные публикации и комментарии. Перед удалением материала должна открываться подтверждающая страница, содержащая публикацию или комментарий.
+    \item Новые статичные страницы. Обновить механизм создания и изменения статичных страниц в проекте, используя CBV. Адреса уже существующих статичных страниц не должны измениться.
+    \item Отправка электронной почты. Подключить файловый бэкенд: все «отправленные» письма должны аккумулироваться в специальной директории проекта \texttt{sent\_emails}. Из репозитория проекта эту директорию стоит исключить.
+    \item Для выполнения задания необходимо использовать view-функции (FBV), view-классы (CBV) или их микс.
+\end{enumerate}
+
+\section{Реализация проекта}
+\subsection{Кастомные страницы для ошибок}
+
+В проекте реализованы пользовательские страницы ошибок 403 (CSRF), 404 и 500. При возникновении ошибок HTTP 403, 404 или 500 Django вызывает соответствующие обработчики, которые отображают кастомные шаблоны вместо стандартных страниц ошибок. Шаблоны расположены в \texttt{templates/pages/}, обработчики — в \texttt{pages/views.py}.
+
+\begin{lstlisting}[language=Python]
+def page_not_found(request, exception):
+    return render(request, 'pages/404.html', status=404)
+
+def csrf_failure(request, reason=''):
+    return render(request, 'pages/403csrf.html', status=403)
+
+def server_error(request):
+    return render(request, 'pages/500.html', status=500)
+\end{lstlisting}
+
+Настройки в \texttt{blogicum/urls.py}:
+
+\begin{lstlisting}[language=Python]
+handler403 = 'pages.views.permission_denied'
+handler404 = 'pages.views.page_not_found'
+handler500 = 'pages.views.server_error'
+\end{lstlisting}
+
+Настройка CSRF в \texttt{blogicum/settings.py}:
+
+\begin{lstlisting}[language=Python]
+CSRF_FAILURE_VIEW = 'pages.views.csrf_failure'
+\end{lstlisting}
+
+\newpage
+\subsection{Работа с пользователями}
+
+В проекте подключена система аутентификации Django, реализованы страницы регистрации, входа, профиля и редактирования профиля. Используются встроенные механизмы Django для аутентификации. Страница регистрации создает новых пользователей через \texttt{UserCreationForm}. 
+
+\begin{lstlisting}[language=Python]
+path('auth/', include('django.contrib.auth.urls')),
+path('auth/registration/', CreateView.as_view(
+    template_name='registration/registration_form.html',
+    form_class=UserCreationForm,
+    success_url=reverse_lazy('blog:index'),
+), name='registration'),
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Reg.png}
+    \caption{Форма регистрации пользователя}
+    \label{fig:registration}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Avto.png}
+    \caption{Форма входа в систему}
+    \label{fig:login}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Pol.png}
+    \caption{Страница профиля пользователя}
+    \label{fig:profile}
+\end{figure}
+
+\newpage
+\subsection{Пагинация}
+
+В проекте настроена пагинация на главной странице, странице пользователя и странице категории. Объект \texttt{Paginator} разбивает список публикаций на страницы по 10 элементов. Номер текущей страницы передается через GET-параметр \texttt{page}.
+
+\begin{lstlisting}[language=Python]
+paginator = Paginator(post_list, 10)
+page_number = request.GET.get('page')
+page_obj = paginator.get_page(page_number)
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{P2.png}
+    \label{fig:user_pagination}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{P1.png}
+    \caption{Пагинация}
+    \label{fig:pagination_nav}
+\end{figure}
+
+На фотографиях представлена страница пользователя с пагинацией публикаций. Отображаются заголовки постов, информация об авторе, категории и времени публикации. В нижней части страницы видна панель навигации с элементами "Первая", "<<", "1", "2". На фото показана расширенная панель навигации пагинации с элементами "1", "2", ">>", "Последняя", что позволяет пользователю удобно перемещаться между страницами публикаций.
+
+Пагинация реализована с использованием Django Paginator, который автоматически рассчитывает количество страниц и предоставляет удобный интерфейс для навигации. На каждой странице отображается не более 10 публикаций, что обеспечивает оптимальную производительность и удобство восприятия информации.
+
+\newpage
+\subsection{Изображения к постам}
+
+В проекте реализована возможность прикрепления изображений к публикациям. Добавлено поле \texttt{image} в модель \texttt{Post}, настроена работа с медиафайлами. Поле \texttt{ImageField} в модели \texttt{Post} позволяет загружать изображения. Файлы сохраняются в директории \texttt{media/}, настроенной в проекте. Изображения отображаются в шаблонах через тег \texttt{\{\{ post.image.url \}\}}.
+
+\begin{lstlisting}[language=Python]
+image = models.ImageField(
+    'Изображение',
+    upload_to='posts_images',
+    blank=True
+)
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Post.png}
+    \caption{Публикация с изображением}
+    \label{fig:post_image}
+\end{figure}
+
+\newpage
+\subsection{Добавление и редактирование публикаций}
+
+В проекте реализованы создание и редактирование постов с проверкой прав доступа. Классы \texttt{CreateView} и \texttt{UpdateView} обрабатывают создание и редактирование постов. При создании автоматически устанавливается автор, при редактировании проверяется, что пользователь является автором поста.
+
+\begin{lstlisting}[language=Python]
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ['title', 'text', 'pub_date', 
+                  'image', 'location', 'category', 
+                  'is_published']
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+class PostCreateView(PostsEditMixin, LoginRequiredMixin, CreateView):
+    model = Post
+    form_class = CreatePostForm
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Pub.png}
+    \caption{Форма добавления новой публикации}
+    \label{fig:add_post}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Red.png}
+    \caption{Форма редактирования существующей публикации}
+    \label{fig:edit_post}
+\end{figure}
+
+Формы используют Django ModelForm для автоматической генерации полей на основе модели Post. Поле \texttt{pub\_date} поддерживает отложенные публикации — если установить дату в будущем, пост автоматически станет доступен в указанное время.
+
+\newpage
+\subsection{Комментарии к публикациям}
+
+В проекте реализована система комментирования с возможностью добавления, редактирования и удаления. Модель \texttt{Comment} связана с \texttt{Post} и \texttt{User} через ForeignKey. Комментарии создаются через форму, которая автоматически связывает комментарий с текущим пользователем и постом.
+
+\begin{lstlisting}[language=Python]
+class Comment(models.Model):
+    text = models.TextField('Текст комментария')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE,
+                             related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+class CreateCommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ("text",)
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Com.png}
+    \caption{Страница публикации с формой добавления комментария}
+    \label{fig:comments_form}
+\end{figure}
+
+Система комментирования обеспечивает интерактивное взаимодействие пользователей с контентом. Форма комментария отображается непосредственно под публикацией, что упрощает процесс добавления комментариев. Реализованная связь между моделями Post и Comment гарантирует корректное отображение комментариев только для соответствующей публикации и обеспечивает целостность данных при удалении поста.
+
+\newpage
+\subsection{Удаление публикаций и комментариев}
+
+В проекте реализовано удаление с подтверждением и проверкой прав. \texttt{DeleteView} предоставляет подтверждающую страницу перед удалением. В методе \texttt{delete()} проверяется, что удаляющий является автором объекта, предотвращая несанкционированное удаление.
+
+\begin{lstlisting}[language=Python]
+class PostDeleteView(PostsEditMixin, LoginRequiredMixin, DeleteView):
+    model = Post
+    success_url = reverse_lazy('blog:index')
+    pk_url_kwarg = 'post_id'
+
+    def delete(self, request, *args, **kwargs):
+        post = get_object_or_404(Post, pk=self.kwargs[self.pk_url_kwarg])
+        if self.request.user != post.author:
+            return redirect('blog:index')
+        return super().delete(request, *args, **kwargs)
+\end{lstlisting}
+
+\newpage
+\subsection{Новые статичные страницы}
+
+В проекте статичные страницы переведены на CBV. \texttt{TemplateView} отображает указанный шаблон без дополнительной логики. Переход с FBV на CBV улучшает структуру кода и облегчает расширение функциональности.
+
+\begin{lstlisting}[language=Python]
+class AboutPage(TemplateView):
+    template_name = 'pages/about.html'
+
+class RulesPage(TemplateView):
+    template_name = 'pages/rules.html'
+\end{lstlisting}
+
+\newpage
+\subsection{Отправка электронной почты}
+
+В проекте настроен файловый бэкенд для отправки писем. Файловый бэкенд сохраняет все отправляемые письма в виде файлов в директории \texttt{sent\_emails/}, что позволяет тестировать email-функциональность без настройки реального SMTP-сервера.
+
+\begin{lstlisting}[language=Python]
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
+\end{lstlisting}
+
+\newpage
+\subsection{Миксины для повторного использования кода}
+
+В рамках проекта реализованы миксины для устранения дублирования кода в view-классах. Миксины группируют общие настройки для похожих view-классов. \texttt{PostsEditMixin} определяет общие параметры для работы с постами, \texttt{CommentEditMixin} — для работы с комментариями, включая URL перенаправления.
+
+\begin{lstlisting}[language=Python]
+class PostsEditMixin:
+    model = Post
+    template_name = 'blog/create.html'
+
+class CommentEditMixin:
+    model = Comment
+    pk_url_kwarg = 'comment_pk'
+    template_name = 'blog/comment.html'
+    
+    def get_success_url(self):
+        return reverse('blog:post_detail', args=[self.kwargs['post_id']])
+\end{lstlisting}
+
+\newpage
+\section{Заключение}
+
+В ходе выполнения проекта были успешно реализованы все поставленные задачи: система пользователей, работа с публикациями и комментариями, пагинация, обработка изображений, кастомные страницы ошибок и отправка электронной почты. Приложение «Блогикум» получило полноценный функционал современной блог-платформы.
+
+Все компоненты были реализованы с использованием современных подходов Django, включая Class-Based Views, миксины для повторного использования кода, и встроенные механизмы аутентификации и пагинации. Проект демонстрирует умение работать с полным циклом разработки веб-приложения на Django.
+
+
+\newpage
+\section*{СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}
+\addcontentsline{toc}{section}{СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}
+
+\begin{enumerate}
+    \item Прохоренок, Н. А. Python 3: самое необходимое [Текст] / Н. А. Прохоренок. — Санкт-Петербург : БХВ-Петербург, 2016.
+    
+    \item Сысоева, М. В. Программирование для «нормальных» с нуля на языке Python, Часть 1 [Текст] / М. В. Сысоева, И. В. Сысоев. — Москва : Базальт СПО, МАКС Пресс, 2018.
+    
+    \item User authentication in Django [Электронный ресурс]. — [Б. м. : б. и.]. — URL: \url{https://docs.djangoproject.com/en/3.2/topics/auth/#installation} (дата обращения: 12.12.2025). Загл. с экр. Яз. англ.
+    
+    \item Form and field validation [Электронный ресурс]. — [Б. м. : б. и.]. — URL: \url{https://docs.djangoproject.com/en/3.2/ref/forms/validation/} (дата обращения: 16.12.2025). Загл. с экр. Яз. англ.
+    
+    \item Paginator [Электронный ресурс]. — [Б. м. : б. и.]. — URL: \url{https://docs.djangoproject.com/en/3.2/ref/paginator/#django.core.paginator.Paginator} (дата обращения: 16.12.2025). Загл. с экр. Яз. англ.
+    
+    \item Урок «Отправка писем. Эмуляция почтового сервера» в теме «Пользователи в Django» на Яндекс.Практикум [Электронный ресурс]. — [Б. м. : б. и.]. — URL: \url{https://practicum.yandex.ru/learn/associated-programs-backend-st-v2/courses/ec89757c-3eb2-4a7c-995d-71561d3b9661/sprints/733852/topics/168d1c84-dc89-4dd9-b18f-7ae332f51a64/lessons/c8931e25-a6ce-472e-bdb1-2ad1bd1f2e1f/} (дата обращения: 13.12.2025). Загл. с экр. Яз. рус.
+    
+    \item Урок «Настройка страниц входа и выхода пользователей» в теме «Пользователи в Django» на Яндекс.Практикум [Электронный ресурс]. — [Б. м. : б. и.]. — URL: \url{https://practicum.yandex.ru/learn/associated-programs-backend-st-v2/courses/ec89757c-3eb2-4a7c-995d-71561d3b9661/sprints/733852/topics/168d1c84-dc89-4dd9-b18f-7ae332f51a64/lessons/40dfbd65-baa1-42ab-8ebe-122b385cb589/} (дата обращения: 16.12.2025). Загл. с экр. Яз. рус.
+
+\end{enumerate}
+
+\end{document}
+\end{document}

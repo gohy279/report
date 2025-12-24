@@ -1,4 +1,4 @@
-\documentclass[bachelor, och, assignment]{SCWorks}
+\documentclass[bachelor, och, coursework]{SCWorks}
 % параметр - тип обучения - одно из значений:
 %    spec     - специальность
 %    bachelor - бакалавриат (по умолчанию)
@@ -22,6 +22,7 @@
 \usepackage[T2A]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
+\usepackage[hyphens]{url} 
 
 \usepackage[sort,compress]{cite}
 \usepackage{amsmath}
@@ -38,6 +39,8 @@
 \usepackage[colorlinks=true]{hyperref}
 
 \lstset{
+    extendedchars=\true,
+    inputencoding=utf8x,
     language=Python,
     numbers=left,
     backgroundcolor=\color{white},
@@ -54,7 +57,7 @@
 \newcommand{\eqdef}{\stackrel {\rm def}{=}}
 
 \newtheorem{lem}{Лемма}
-
+\worktype{Отчет}
 \begin{document}
 
 
@@ -62,7 +65,7 @@
 \chair{математической кибернетики и компьютерных наук}
 
 % Тема работы
-\title{Проект. Приложение 'Блогикум' }
+\title{Проект. Приложение <<Блогикум>> }
 
 % Курс
 \course{2}
@@ -120,7 +123,7 @@
 \date{2025}
 
 \maketitle
-
+\tableofcontents
 
 \section{Цель работы. Постановка задачи}
 
@@ -187,7 +190,7 @@ handler500 = "pages.views.server_error"
 
 Настройки CSRF в \texttt{blogicum/settings.py}:
 
-\begin{lstlisting}{python}
+\begin{lstlisting}
 CSRF_FAILURE_VIEW = "pages.views.csrf_failure"
 \end{lstlisting}
 
@@ -276,9 +279,261 @@ def paginate_queryset(request, queryset, per_page=10):
 Изображения отображаются в шаблонах через тег \texttt{\{\{ post.image.url \}\}}.
 
 \begin{lstlisting}
-image=models.ImageField('
+image = models.ImageField("Картинка", upload_to="posts_images", blank=True)
 \end{lstlisting}
+
+\begin{lstlisting}
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{static/image_post.png}
+    \caption{Публикация с изображением}
+    \label{fig:image_post}
+\end{figure}
+
 %image=models.ImageField("Картинка", upload_to="posts_images", blank=True)
 \signatureline
+
+\newpage
+\subsection{Добавление и редактирование публикаций}
+
+Пользователи имеют возможность создавать и редактировать посты, если у них на то есть право.
+Классы \texttt{CreateView} и \texttt{UpdateView} обрабатывают создание и редактирование постов. 
+
+При создании автоматически автором поста устанавливается пользователь, который создал пост. 
+При редактировании проверяется, что пользователь является автором поста.
+
+\begin{lstlisting}
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ("title", "text", "pub_date", "location",
+                  "category", "image", "is_published")
+        widgets = {
+            "pub_date": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+        }
+\end{lstlisting}
+
+\begin{lstlisting}
+class PostCreateView(LoginRequiredMixin, CreateView):
+    model = Post
+    template_name = "blog/create.html"
+    form_class = PostForm
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("profile", kwargs={"username": self.request.user.username})
+\end{lstlisting}
+
+\begin{lstlisting}
+class PostUpdateView(LoginRequiredMixin, UpdateView):
+    model = Post
+    form_class = PostForm
+    template_name = "blog/create.html"
+    pk_url_kwarg = "post_id"
+
+    def handle_no_permission(self):
+        return redirect("blog:post_detail", post_id=self.kwargs["post_id"])
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        post = self.get_object()
+        if post.author != request.user:
+            return redirect("blog:post_detail", post_id=post.pk)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        context = {"post_id": self.object.pk}
+        return reverse_lazy("blog:post_detail", kwargs=context)
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{static/create_post.png}
+    \caption{Форма создания публикации}
+    \label{fig:create_post}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{static/edit_post.png}
+    \caption{Форма редактирования публикации}
+    \label{fig:edit_post}
+\end{figure}
+
+Используется Django ModelForm для автоматической генерации полей на основе модели \texttt{Post}.
+В поле \texttt{pub\_date} содрежится дата публикации, если установить туда дату в будущем, то пост будет недоступен для чтения всем пользователям кроме автора до наступления этой даты и автоматически станет доступным после.
+
+\newpage
+\subsection{Комментарии к публикациям}
+
+В проекте реализована система комментариев под публикациями. 
+Пользователи могут оставлять новые комменатрии, редактировать и удалять уже существующие.
+Модель \texttt{Comment} связана с \texttt{Post} и \texttt{User} через ForeignKey.
+Комментарии создаются через форму, которая автоматически связывает комментарий с текущим пользователем и постом.
+
+\begin{lstlisting}
+class Comment(models.Model):
+    text = models.TextField("Текст комментария")
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="comments",
+        verbose_name="Публикация",
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="comments",
+        verbose_name="Автор комментария",
+    )
+    created_at = models.DateTimeField("Добавлено", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Комментарий"
+        verbose_name_plural = "Комментарии"
+        ordering = ("created_at",)
+
+    def __str__(self):
+        return f'Комментарий {self.author} к посту "{self.post}"'
+\end{lstlisting}
+
+\begin{lstlisting}
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ("text",)
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{static/comments_create.png}
+    \caption{Страница публикации с формой для создания комментария}
+    \label{fig:comments_create}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{static/comments_edit.png}
+    \caption{Созданный комментарий и возможность удаления и редактирования}
+    \label{fig:comments_edit}
+\end{figure}
+
+\newpage
+\subsection{Удаление публикаций и комментариев}
+
+Пользователи могут удалять комментарии и публикации с подтверждением и проверкой прав.
+\texttt{DeleteView} выводит страницу подтверждения перед удалением. 
+
+При удалении объекта \texttt{Post} автоматически удалятся все привязанные к нему объекты \texttt{Comment}.
+
+\begin{lstlisting}
+class PostDeleteView(LoginRequiredMixin, DeleteView):
+    model = Post
+    template_name = "blog/create.html"
+    pk_url_kwarg = "post_id"
+
+    def handle_no_permission(self):
+        return redirect("blog:post_detail", post_id=self.kwargs["post_id"])
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        post = self.get_object()
+        if post.author != request.user:
+            return redirect("blog:post_detail", post_id=post.pk)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        post = self.object
+        context["form"] = PostForm(instance=post)
+        return context
+
+    def get_success_url(self):
+        context = {"username": self.object.author.username}
+        return reverse_lazy("profile", kwargs=context)
+\end{lstlisting}
+
+\begin{lstlisting}
+class CommentDeleteView(LoginRequiredMixin, DeleteView):
+    model = Comment
+    template_name = "blog/comment.html"
+    pk_url_kwarg = "comment_id"
+
+    def get_queryset(self):
+        post = get_object_or_404(Post, pk=self.kwargs["post_id"])
+        return Comment.objects.filter(author=self.request.user, post=post)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["comment"] = self.object
+        context.pop("form", None)
+        return context
+
+    def get_success_url(self):
+        context = {"post_id": self.object.post.pk}
+        return reverse_lazy("blog:post_detail", kwargs=context)
+\end{lstlisting}
+
+\newpage
+\subsection{Новые статичные страницы}
+
+Статичные страницы отображаются с помощью CBV.
+Наследуя базовый класс \texttt{TemplateView}, остальные CBV получают возможность не писать логику отображения заново, а переиспользовать уже готовый шаблон.
+
+\begin{lstlisting}
+class RulesView(TemplateView):
+    template_name = "pages/rules.html"
+
+class AboutView(TemplateView):
+    template_name = "pages/about.html"
+\end{lstlisting}
+
+\subsection{Отправка электронной почты}
+
+Настроен файловый бэкенд для отправки писем на электронную почту пользователей, что может быть использовано при восстановлении паролей.
+Реальный SMTP-сервер не настроен, поэтому бэкенд сохранят все отправленные письма в виде файлов в директории \texttt{sent\_emails/},
+
+\begin{lstlisting}
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
+\end{lstlisting}
+
+
+\newpage
+\section{Заключение}
+
+В ходе выполнения проекта было доработано приложение <<Блогикум>> до реализации стандартов современного веб-приложения. 
+
+Выполнены все задачи с использованием современных возможностей фреймворка Django: кастомные страницы ошибок, работа с пользователями, пагинация, добавление изображение, создание, удаление и редактирование публикаций, создание, удаление и редактирование комментариев, статичные страницы, отправка электронной почты, использование CBV.
+
+\newpage
+\section*{СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}
+\addcontentsline{toc}{section}{СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}
+
+\begin{enumerate}
+    \item Лутц Марк. Изучаем Python [Текст] / Марк Лутц --- Санкт-Петербург :  ООО <<Диалектика>>, 2019.
+    \item Любанович Билл. Простой Python. Современный стиль программирования [Текст] / Билл Любанович --- Санкт-Петербург :  ООО Издательство <<Питер>>, 2016.
+    \item User authentication in Django [Электронный ресурс]. — [Б. м. : б. и.]. — URL: \url{https://docs.djangoproject.com/en/3.2/topics/auth/#installation} (дата обращения: 23.12.2025). Загл. с экр. Яз. англ.
+
+    \item Form and field validation [Электронный ресурс]. — [Б. м. : б. и.]. — URL: \url{https://docs.djangoproject.com/en/3.2/ref/forms/validation/} (дата обращения: 23.12.2025). Загл. с экр. Яз. англ.
+    
+    \item Paginator [Электронный ресурс]. — [Б. м. : б. и.]. — URL: \url{https://docs.djangoproject.com/en/3.2/ref/paginator/#django.core.paginator.Paginator} (дата обращения: 23.12.2025). Загл. с экр. Яз. англ.
+    
+    \item Урок «CBV: view-классы вместо view-функций» в теме «Работа с формами» на Яндекс.Практикум [Электронный ресурс]. — [Б. м. : б. и.]. — URL: \url{https://practicum.yandex.ru/learn/associated-programs-backend-st-v2/courses/ec89757c-3eb2-4a7c-995d-71561d3b9661/sprints/733888/topics/2155b6e2-0f37-4ff2-ae90-b2f8cccefd01/lessons/7f10332c-30f5-4386-917b-d7a073af8f5c/} (дата обращения: 23.12.2025). Загл. с экр. Яз. рус.
+
+
+    \item Урок «Настройка страниц входа и выхода пользователей» в теме «Пользователи в Django» на Яндекс.Практикум [Электронный ресурс]. — [Б. м. : б. и.]. — URL: \url{https://practicum.yandex.ru/learn/associated-programs-backend-st-v2/courses/ec89757c-3eb2-4a7c-995d-71561d3b9661/sprints/733852/topics/168d1c84-dc89-4dd9-b18f-7ae332f51a64/lessons/40dfbd65-baa1-42ab-8ebe-122b385cb589/} (дата обращения: 23.12.2025). Загл. с экр. Яз. рус.
+
+    \item Урок «Отправка писем. Эмуляция почтового сервера» в теме «Пользователи в Django» на Яндекс.Практикум [Электронный ресурс]. — [Б. м. : б. и.]. — URL: \url{https://practicum.yandex.ru/learn/associated-programs-backend-st-v2/courses/ec89757c-3eb2-4a7c-995d-71561d3b9661/sprints/733852/topics/168d1c84-dc89-4dd9-b18f-7ae332f51a64/lessons/c8931e25-a6ce-472e-bdb1-2ad1bd1f2e1f/} (дата обращения: 23.12.2025). Загл. с экр. Яз. рус.
+\end{enumerate}
 
 \end{document}
