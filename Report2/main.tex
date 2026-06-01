@@ -1,0 +1,664 @@
+\documentclass[bachelor, och, pract]{../SCWorks}
+% параметр - тип обучения - одно из значений:
+%    spec     - специальность
+%    bachelor - бакалавриат (по умолчанию)
+%    master   - магистратура
+% параметр - форма обучения - одно из значений:
+%    och   - очное (по умолчанию)
+%    zaoch - заочное
+% параметр - тип работы - одно из значений:
+%    referat    - реферат
+%    coursework - курсовая работа (по умолчанию)
+%    diploma    - дипломная работа
+%    pract      - отчет по практике
+%    pract      - отчет о научно-исследовательской работе
+%    autoref    - автореферат выпускной работы
+%    assignment - задание на выпускную квалификационную работу
+%    review     - отзыв руководителя
+%    critique   - рецензия на выпускную работу
+% параметр - включение шрифта
+%    times    - включение шрифта Times New Roman (если установлен)
+%               по умолчанию выключен
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage[hyphens]{url} 
+
+\usepackage[sort,compress]{cite}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{fancyvrb}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{array}
+\usepackage[english,russian]{babel}
+\usepackage{minted}
+\usepackage{tempora}
+
+\usepackage[colorlinks=true]{hyperref}
+
+\lstset{
+    extendedchars=\true,
+    inputencoding=utf8x,
+    language=Python,
+    numbers=left,
+    backgroundcolor=\color{white},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=none,
+    tabsize=4,
+    xleftmargin=0pt,
+    xrightmargin=0pt,
+    aboveskip=0pt,
+    belowskip=0pt
+}
+
+\newcommand{\eqdef}{\stackrel {\rm def}{=}}
+
+\newtheorem{lem}{Лемма}
+\worktype{Отчет о практике}
+\begin{document}
+
+
+% Кафедра (в родительном падеже)
+\chair{математической кибернетики и компьютерных наук}
+
+% Тема работы
+\title{Проект. Приложение <<Team Finder>> }
+
+% Курс
+\course{2}
+
+% Группа
+\group{251}
+
+% Факультет (в родительном падеже) (по умолчанию "факультета КНиИТ")
+%\department{факультета КНиИТ}
+
+% Специальность/направление код - наименование
+\napravlenie{09.03.04 "--- Программная инженерия}
+%\napravlenie{02.03.01 "--- Математическое обеспечение и администрирование информационных систем}
+%\napravlenie{09.03.01 "--- Информатика и вычислительная техника}
+%\napravlenie{09.03.04 "--- Программная инженерия}
+%\napravlenie{10.05.01 "--- Компьютерная безопасность}
+
+% Для студентки. Для работы студента следующая команда не нужна.
+%\studenttitle{Студентки}
+
+% Фамилия, имя, отчество в родительном падеже
+\author{Архипова Ивана Сергеевича}
+
+% Заведующий кафедрой
+\chtitle{доцент, к.\,ф.-м.\,н.} % степень, звание
+\chname{С.\,В.\,Миронов}
+
+%Научный руководитель (для реферата преподаватель проверяющий работу)
+\satitle{доцент, к.\,ф.-м.\,н.} %должность, степень, звание
+\saname{И.\,А.\,Батраева}
+
+% % Руководитель практики от организации (только для практики,
+% % для остальных типов работ не используется)
+% \patitle{к.\,ф.-м.\,н., доцент}
+% \paname{Д.\,Ю.\,Петров}
+
+% Семестр (только для практики, для остальных
+% типов работ не используется)
+\term{4}
+
+% Наименование практики (только для практики, для остальных
+% типов работ не используется)
+\practtype{проектная}
+
+% Продолжительность практики (количество недель) (только для практики,
+% для остальных типов работ не используется)
+\duration{17}
+
+% Даты начала и окончания практики (только для практики, для остальных
+% типов работ не используется)
+\practStart{09.02.2026}
+\practFinish{10.06.2026}
+
+% Год выполнения отчета
+\date{2026}
+
+\maketitle
+\tableofcontents
+
+\section{Цель работы. Постановка задачи}
+
+\textbf{Цель работы:} создание веб-приложения «Team Finder» --- платформы, на которой разработчики, дизайнеры и другие специалисты смогут находить единомышленников для совместной работы над pet-проектами. Зарегистрированные пользователи получат возможность размещать идеи проектов, собирать команду и откликаться на опубликованные предложения.
+
+\textbf{Постановка задачи:} необходимо реализовать следующие функциональные возможности:
+
+\begin{enumerate}
+    \item Работа с пользователями. Создать кастомную модель пользователя с аутентификацией по email. Реализовать страницы регистрации, входа, выхода, просмотра и редактирования профиля, смены пароля.
+    \item Пагинация. Подключить к проекту пагинацию и настроить вывод не более 12 проектов на главную страницу и на страницу списка пользователей.
+    \item Аватарки пользователей. Добавить возможность загрузки аватарки. При регистрации должна автоматически генерироваться первоначальная аватарка с первой буквой имени.
+    \item Создание проектов. У зарегистрированных пользователей должна быть возможность создавать новые проекты.
+    \item Редактирование проектов. Автор проекта должен иметь возможность изменить его параметры.
+    \item Система участия в проектах. Реализовать возможность присоединяться к проектам и отказываться от участия.
+    \item Управление статусом и навыками проекта. Автор может завершить проект. Владелец проекта может добавлять и удалять навыки, необходимые проекту.
+    \item Фильтрация проектов по навыкам. На странице списка проектов должна быть панель фильтрации по необходимым навыкам.
+    \item Для выполнения задания необходимо использовать view-классы (CBV).
+\end{enumerate}
+
+\section{Реализация проекта}
+\subsection{Работа с пользователями}
+
+В проекте используется кастомная модель пользователя, унаследованная от \texttt{AbstractUser}, с аутентификацией по \texttt{email}.
+Модель включает поля: \texttt{email} (уникальный, идентификатор), \texttt{first\_name}, \texttt{surname}, \texttt{avatar}, \texttt{phone}, \texttt{github\_url}, \texttt{about}.
+Реализованы страницы регистрации, входа, выхода, просмотра и редактирования профиля, смены пароля.
+Для регистрации используется собственная форма \texttt{UserRegisterForm}.
+
+Модель \texttt{User} в \texttt{users/models.py}:
+
+\begin{lstlisting}
+class User(AbstractUser):
+    email = models.EmailField(unique=True, verbose_name="Почта")
+    first_name = models.CharField(
+        max_length=constants.USER_FIRST_NAME_MAX_LENGTH, verbose_name="Имя")
+    surname = models.CharField(
+        max_length=constants.USER_SURNAME_MAX_LENGTH, verbose_name="Фамилия")
+    avatar = models.ImageField(
+        upload_to='avatars/', verbose_name="Аватар")
+    phone = models.CharField(
+        max_length=constants.PHONE_NUMBER_MAX_LENGTH,
+        verbose_name='Номер телефона'
+    )
+    github_url = models.URLField(
+        blank=True,
+        default='',
+        validators=[URLValidator()],
+        verbose_name='Аккаунт на GitHub'
+    )
+    objects = UserManager()
+    about = models.TextField(
+        max_length=constants.USER_ABOUT_MAX_LENGTH,
+        blank=True,
+        default='',
+        verbose_name='Описание профиля'
+    )
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'surname']
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ['id']
+
+    def __str__(self):
+        return f"{self.first_name} {self.surname} ({self.email})"
+\end{lstlisting}
+
+Настройки в \texttt{users/urls.py}:
+
+\begin{lstlisting}
+from .views import (PasswordChangeView, UserDetailView, UserEditView,
+                    UserListView, UserLoginView, UserLogoutView,
+                    UserRegisterView)
+
+app_name = 'users'
+
+urlpatterns = [
+    path('register/', UserRegisterView.as_view(), name='register'),
+    path('login/', UserLoginView.as_view(), name='login'),
+    path('logout/', UserLogoutView.as_view(), name='logout'),
+    path('edit-profile/', UserEditView.as_view(), name='edit'),
+    path('<int:user_id>/', UserDetailView.as_view(), name='user_detail'),
+    path('change-password/', PasswordChangeView.as_view(), name='change-password'),
+    path('list/', UserListView.as_view(), name='list'),
+]
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{static/register.png}
+    \caption{Форма для регистрации пользователя}
+    \label{fig:registration}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{static/login.png}
+    \caption{Форма для входа в систему}
+    \label{fig:login}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{static/user.png}
+    \caption{Страница профиля пользователя}
+    \label{fig:profile}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{static/user_edit.png}
+    \caption{Страница редактирования профиля пользователя}
+    \label{fig:profile_edit}
+\end{figure}
+
+\newpage
+\subsection{Пагинация}
+
+В проекте настроена пагинация на главной странице проектов и на странице списка пользователей.
+Списки делятся на страницы по 12 элементов с помощью штатного механизма \texttt{ListView} и атрибута \texttt{paginate\_by}.
+Константа \texttt{DEFAULT\_PAGINATION\_LIMIT} вынесена в отдельный файл \texttt{constants.py}.
+
+View-класс \texttt{ProjectListView} \texttt{projects/views.py}:
+ 
+\begin{lstlisting}
+class ProjectListView(ListView):
+    model = Project
+    template_name = 'projects/project_list.html'
+    context_object_name = 'projects'
+    paginate_by = constants.DEFAULT_PAGINATION_LIMIT
+
+    def get_queryset(self):
+        queryset = Project.objects.select_related('owner').prefetch_related(
+            'participants',
+            'skills'
+        )
+        skill_name = self.request.GET.get('skill')
+        if skill_name:
+            queryset = queryset.filter(skills__name=skill_name.strip())
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['all_skills'] = Skill.objects.all()
+        skill_name = self.request.GET.get('skill')
+        if skill_name:
+            context['active_skill'] = Skill.objects.filter(
+                name=skill_name.strip()).first()
+        else:
+            context['active_skill'] = None
+        return context
+\end{lstlisting}
+
+View-класс \texttt{UserListView} в \texttt{users/views.py}:
+
+\begin{lstlisting}
+class UserListView(ListView):
+    model = User
+    template_name = 'users/participants.html'
+    context_object_name = 'participants'
+    paginate_by = constants.DEFAULT_PAGINATION_LIMIT
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['query_prefix'] = ''
+        return context
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{static/user_pagination.png}
+    \caption{Пагинация списка проектов}
+    \label{fig:project_pagination}
+\end{figure}
+
+На рисунках представлена страница списка проектов с пагинацией в размере 12 проектов на страницу.
+Карточка проекта содержит заголовок, описание, информацию об авторе (ФИ и аватар), дату публикации и статус.
+С помощью навигационной панели внизу страницы пользователь может перемещаться между страницами.
+
+\newpage
+\subsection{Аватарки пользователей}
+
+В проекте реализована возможность загрузки аватарок пользователей.
+В модель \texttt{User} добавлено поле \texttt{avatar} типа \texttt{ImageField}, настроена работа с файлами.
+При создании пользователя генерируется первоначальная аватарка: первая буква имени на однотонном фоне со случайным цветом.
+Файлы по умолчанию сохраняются в директории \texttt{media/avatars/}, указанной в настройках проекта.
+Аватарки отображаются в шаблонах через тег \texttt{\{\{ user.avatar.url \}\}}.
+
+Настройки в \texttt{users/models.py}:
+
+\begin{lstlisting}
+avatar = models.ImageField(upload_to='avatars/', verbose_name="Аватар")
+\end{lstlisting}
+
+Настройки в \texttt{team\_finder/settings.py}:
+
+\begin{lstlisting}
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{static/image_post.png}
+    \caption{Профиль пользователя с аватаркой}
+    \label{fig:avatar}
+\end{figure}
+
+\newpage
+\subsection{Добавление и редактирование проектов}
+
+Пользователи имеют возможность создавать и редактировать проекты.
+Классы \texttt{CreateView} и \texttt{UpdateView} обрабатывают создание и редактирование проектов.
+
+При создании автоматически владельцем проекта устанавливается текущий пользователь, который также добавляется в участники.
+При редактировании проверяется, что пользователь является владельцем проекта; при нарушении вызывается \texttt{PermissionDenied}.
+
+Класс \texttt{ProjectCreateForm} в \texttt{projects/forms.py}:
+
+\begin{lstlisting}
+class ProjectCreateForm(forms.ModelForm):
+    class Meta:
+        model = Project
+        fields = ('name', 'description', 'github_url', 'status')
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'placeholder': 'Название проекта'
+            }),
+            'description': forms.Textarea(attrs={
+                'placeholder': 'Описание проекта',
+                'rows': constants.PROJECT_FORM_DESCRIPTION_LENGTH
+            }),
+            'github_url': forms.URLInput(attrs={
+                'placeholder': 'https://github.com/username/repo'
+            }),
+            'status': forms.Select(attrs={
+                'class': 'form-select',
+            }),
+        }
+\end{lstlisting}
+
+View-класс \texttt{ProjectCreateView} в \texttt{projects/views.py}:
+
+\begin{lstlisting}
+class ProjectCreateView(LoginRequiredMixin, CreateView):
+    model = Project
+    form_class = ProjectCreateForm
+    template_name = 'projects/create-project.html'
+    success_url = reverse_lazy('projects:project_list')
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        response = super().form_valid(form)
+        self.object.participants.add(self.request.user)
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_edit'] = False
+        return context
+\end{lstlisting}
+
+View-класс \texttt{ProjectEditView} в \texttt{projects/views.py}:
+
+\begin{lstlisting}
+class ProjectEditView(LoginRequiredMixin, UpdateView):
+    model = Project
+    form_class = ProjectCreateForm
+    template_name = 'projects/create-project.html'
+    pk_url_kwarg = 'project_id'
+
+    def get_success_url(self):
+        return reverse_lazy('projects:project_detail',
+                            kwargs={'project_id': self.object.pk})
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.owner != request.user:
+            raise PermissionDenied(
+                'Вы не можете редактировать чужой проект!')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_edit'] = True
+        return context
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{static/create_post.png}
+    \caption{Форма создания проекта}
+    \label{fig:create_project}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{static/edit_post.png}
+    \caption{Форма редактирования проекта}
+    \label{fig:edit_project}
+\end{figure}
+
+Используется Django ModelForm для автоматической генерации полей на основе модели \texttt{Project}.
+В форме присутствует валидация поля \texttt{github\_url}: ссылка должна быть валидной и вести на GitHub.
+Поле \texttt{status} представлено выпадающим списком с вариантами <<Открыт>> (open) и <<Закрыт>> (closed).
+
+\newpage
+\subsection{Участие в проектах}
+
+В проекте реализована система участия в проектах.
+Авторизованные пользователи могут присоединяться к чужим проектам или отказываться от участия.
+Связь между пользователем и проектом реализована через ManyToMany-поле \texttt{participants} в модели \texttt{Project}.
+Взаимодействие реализовано через POST-запросы с JSON-ответом.
+
+Модель \texttt{Project} в \texttt{projects/models.py}:
+
+\begin{lstlisting}
+class Project(models.Model):
+    class Status(models.TextChoices):
+        OPEN = 'open', 'Открыт'
+        CLOSED = 'closed', 'Закрыт'
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='owned_projects',
+        verbose_name='Автор проекта'
+    )
+    name = models.CharField(
+        max_length=constants.PROJECT_NAME_MAX_LENGTH,
+        verbose_name='Название проекта')
+    description = models.TextField(
+        blank=True, verbose_name='Описание проекта')
+    participants = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        related_name='participated_projects',
+        verbose_name='Участники')
+    github_url = models.URLField(
+        blank=True, verbose_name='Ссылка на GitHub')
+    created_at = models.DateTimeField(
+        auto_now_add=True, blank=True, verbose_name='Дата создания')
+    status = models.CharField(
+        max_length=constants.PROJECT_STATUS_MAX_LENGTH,
+        choices=Status.choices,
+        default=Status.OPEN,
+        verbose_name='Статус')
+    skills = models.ManyToManyField(
+        Skill,
+        blank=True,
+        related_name='projects',
+        verbose_name='Навыки проекта')
+
+    class Meta:
+        verbose_name = 'Проект'
+        verbose_name_plural = 'Проекты'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.name
+\end{lstlisting}
+
+View-класс \texttt{AddParticipantView} в \texttt{projects/views.py}:
+
+\begin{lstlisting}
+class AddParticipantView(LoginRequiredMixin, View):
+    def post(self, request, project_id):
+        project = get_object_or_404(Project, pk=project_id)
+
+        if project.status != Project.Status.OPEN:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'В завершенный проект нельзя вступить'
+            }, status=HTTPStatus.BAD_REQUEST)
+
+        if project.owner == request.user:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Вы являетесь владельцем своего проекта'
+            }, status=HTTPStatus.BAD_REQUEST)
+
+        if project.participants.filter(pk=request.user.pk).exists():
+            project.participants.remove(request.user)
+            response_data = {
+                'status': 'ok',
+                'participant': None
+            }
+        else:
+            project.participants.add(request.user)
+            response_data = {
+                'status': 'ok',
+                'participant': {
+                    'id': request.user.id,
+                    'name': f'{request.user.first_name} {request.user.surname}',
+                    'avatar': (
+                        request.user.avatar.url
+                        if request.user.avatar else None
+                    )
+                }
+            }
+        return JsonResponse(response_data)
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{static/comments_create.png}
+    \caption{Страница проекта с кнопкой участия и список участников проекта}
+    \label{fig:participate}
+\end{figure}
+
+\newpage
+\subsection{Закрытие проектов}
+
+Реализование закрытие владельцем проекта, владелец может сменить его статус на <<closed>>.
+
+View-класс \texttt{ProjectCompleteView} в \texttt{projects/views.py}:
+
+\begin{lstlisting}
+class ProjectCompleteView(LoginRequiredMixin, View):
+    def post(self, request, project_id):
+        project = get_object_or_404(Project, pk=project_id)
+
+        if project.owner != request.user:
+            return JsonResponse(
+                {'status': 'error',
+                 'message': 'Вы не можете завершить чужой проект!'},
+                status=HTTPStatus.FORBIDDEN
+            )
+
+        if project.status != Project.Status.OPEN:
+            return JsonResponse(
+                {'status': 'error',
+                 'message': 'Проект уже завершён'},
+                status=HTTPStatus.CONFLICT
+            )
+
+        project.status = Project.Status.CLOSED
+        project.save()
+        return JsonResponse({'status': 'ok'})
+\end{lstlisting}
+
+\newpage
+\subsection{Управление навыками}
+
+Также реализовано управление навыками проекта: владелец может добавлять и удалять навыки без перезагрузки страницы.
+При добавлении навыка работает автодополнение: GET-запрос к \texttt{projects/skills/?q=...} возвращает первые 10 подходящих навыков из базы.
+
+View-классы в \texttt{skills/views.py}:
+
+\begin{lstlisting}
+class SkillAutocompleteView(View):
+    def get(self, request):
+        query = request.GET.get('q', '')
+        skills = Skill.objects.filter(
+            name__icontains=query
+        )[:constants.SKILLS_PAGINATION_LIMIT]
+        data = list(skills.values('id', 'name'))
+        return JsonResponse(data, safe=False)
+
+
+class AddSkillToProjectView(LoginRequiredMixin, View):
+    def post(self, request, project_id):
+        project = get_object_or_404(Project, id=project_id)
+        if project.owner != request.user:
+            return JsonResponse(
+                {'error': 'У вас нет прав для редактирования этого проекта!'},
+                status=HTTPStatus.FORBIDDEN
+            )
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse(
+                {'error': 'Некорректный формат JSON'},
+                status=HTTPStatus.BAD_REQUEST
+            )
+        skill_id = data.get('skill_id')
+        name = data.get('name')
+        if not skill_id and not name:
+            return JsonResponse(
+                {'error': 'Необходимо передать skill_id или name'},
+                status=HTTPStatus.BAD_REQUEST
+            )
+        if skill_id:
+            skill = get_object_or_404(Skill, id=skill_id)
+        else:
+            skill, _ = Skill.objects.get_or_create(name=name.strip())
+        project.skills.add(skill)
+        return JsonResponse({'id': skill.id, 'name': skill.name},
+                            status=HTTPStatus.OK)
+
+
+class RemoveSkillFromProjectView(LoginRequiredMixin, View):
+    def post(self, request, project_id, skill_id):
+        project = get_object_or_404(Project, pk=project_id)
+        if project.owner != request.user:
+            return JsonResponse(
+                {'error': 'У вас нет прав для редактирования этого проекта!'},
+                status=HTTPStatus.FORBIDDEN
+            )
+        skill = get_object_or_404(Skill, pk=skill_id)
+        if project.skills.filter(id=skill.id).exists():
+            project.skills.remove(skill)
+            return JsonResponse({'status': 'ok'})
+        return JsonResponse(
+            {'status': 'error', 'message': 'Навыка нет в проекте'},
+            status=HTTPStatus.BAD_REQUEST
+        )
+\end{lstlisting}
+
+\newpage
+\section{Заключение}
+
+В ходе выполнения проекта было создано веб-приложение «Team Finder», представляющее собой платформу для поиска единомышленников для совместной работы над pet-проектами.
+
+Выполнены все задачи с использованием современных возможностей фреймворка Django: кастомная модель пользователя с аутентификацией по email, пагинация, загрузка аватарок, создание и редактирование проектов, управление участниками и навыками проектов, фильтрация по навыкам, завершение проектов, использование CBV.
+
+\newpage
+\section*{СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}
+\addcontentsline{toc}{section}{СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}
+
+\begin{enumerate}
+    \item Лутц Марк. Изучаем Python [Текст] / Марк Лутц --- Санкт-Петербург :  ООО <<Диалектика>>, 2019.
+    \item Любанович Билл. Простой Python. Современный стиль программирования [Текст] / Билл Любанович --- Санкт-Петербург :  ООО Издательство <<Питер>>, 2016.
+    \item Customizing authentication in Django [Электронный ресурс]. --- [Б. м. : б. и.]. --- URL: \url{https://docs.djangoproject.com/en/5.2/topics/auth/customizing/} (дата обращения: 01.06.2026). Загл. с экр. Яз. англ.
+
+    \item Form and field validation [Электронный ресурс]. --- [Б. м. : б. и.]. --- URL: \url{https://docs.djangoproject.com/en/5.2/ref/forms/validation/} (дата обращения: 01.06.2026). Загл. с экр. Яз. англ.
+    
+    \item Paginator [Электронный ресурс]. --- [Б. м. : б. и.]. --- URL: \url{https://docs.djangoproject.com/en/5.2/ref/paginator/} (дата обращения: 01.06.2026). Загл. с экр. Яз. англ.
+
+    \item Class-based views [Электронный ресурс]. --- [Б. м. : б. и.]. --- URL: \url{https://docs.djangoproject.com/en/5.2/topics/class-based-views/} (дата обращения: 01.06.2026). Загл. с экр. Яз. англ.
+
+    \item QuerySet API reference [Электронный ресурс]. --- [Б. м. : б. и.]. --- URL: \url{https://docs.djangoproject.com/en/5.2/ref/models/querysets/} (дата обращения: 01.06.2026). Загл. с экр. Яз. англ.
+
+\end{enumerate}
+
+\end{document}
